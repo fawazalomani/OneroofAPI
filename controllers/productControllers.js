@@ -1,39 +1,53 @@
 const slugify = require("slugify");
 //Data
-let products = require("../products");
+const { Product } = require("../db/models");
+const { _attributes } = require("../db");
 
-exports.productCreate = (req, res) => {
-  const id = products[products.length - 1].id + 1;
-  const slug = slugify(req.body.name, { lower: true });
-  const newProduct = { id, slug, ...req.body };
-  products.push(newProduct);
-  res.status(201).json(newProduct);
-};
-
-exports.productUpdate = (req, res) => {
-  const { productId } = req.params;
-  const foundProduct = products.find((product) => product.id === +productId);
-  if (foundProduct) {
-    for (const key in req.body) foundProduct[key] = req.body[key];
-    res.status(204).end();
-    console.log("foundProduct", foundProduct);
-  } else {
-    res.status(404).json({ message: "not found" });
+exports.productCreate = async (req, res) => {
+  try {
+    const newProduct = await Product.create(req.body);
+    res.status(201).json(newProduct);
+  } catch (error) {
+    res.status(500).json({ massage: error.massage });
   }
 };
 
-exports.priductDelete = (req, res) => {
-  const { productId } = req.params;
-
-  const foundproduct = products.find((product) => product.id === +productId);
-
-  if (foundproduct) {
-    products = products.filter((product) => product.id !== +productId);
-    res.status(204).end();
-  } else {
-    res.status(404).json({ massage: "not found" });
+exports.productUpdate = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const foundProduct = await Product.findByPk(productId);
+    if (foundProduct) {
+      await foundProduct.update(req.body);
+      res.status(204).end();
+    } else {
+      res.status(404).json({ message: "not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ massage: error.massage });
   }
 };
-exports.productList = (req, res) => {
-  res.json(products);
+
+exports.priductDelete = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const foundProduct = await Product.findByPk(productId);
+    if (foundProduct) {
+      await foundProduct.destroy(req.body);
+      res.status(204).end();
+    } else {
+      res.status(404).json({ message: "not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ massage: error.massage });
+  }
+};
+exports.productList = async (req, res) => {
+  try {
+    const _products = await Product.findAll({
+      attributes: { exclude: ["cratedAt", "updatedAt"] },
+    });
+    res.json(_products);
+  } catch (error) {
+    res.status(500).json({ massage: error.massage });
+  }
 };
