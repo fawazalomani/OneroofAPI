@@ -1,7 +1,7 @@
 const slugify = require("slugify");
 //Data
 const { Product } = require("../db/models");
-const { _attributes } = require("../db");
+const { attributes } = require("../db");
 
 exports.productCreate = async (req, res) => {
   try {
@@ -43,10 +43,10 @@ exports.priductDelete = async (req, res) => {
 };
 exports.productList = async (req, res) => {
   try {
-    const _products = await Product.findAll({
+    const products = await Product.findAll({
       attributes: { exclude: ["cratedAt", "updatedAt"] },
     });
-    res.json(_products);
+    res.json(products);
   } catch (error) {
     res.status(500).json({ massage: error.massage });
   }

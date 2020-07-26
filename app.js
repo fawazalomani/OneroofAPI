@@ -16,6 +16,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+//Routers
 app.use("/products", productRouter);
 
 const run = async () => {
